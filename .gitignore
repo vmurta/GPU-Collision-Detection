@@ -1,0 +1,5 @@
+.vs/
+.vscode/
+Cuda-Collision-Detector/
+__pycache__/
+helloWorld.cu
