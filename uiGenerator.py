@@ -21,11 +21,11 @@ class CollisionUI(Frame):
     def __init__(self, master):
         self.width = 400
         self.height = 400
-        self.numObstacles = 100
+        self.numObstacles = 40
         self.maxObstacleSize = 30
         x_range = range(1, self.width)
         y_range = range(1, self.height)
-        radius_range = range(1,self.maxObstacleSize)
+        radius_range = range(5,self.maxObstacleSize)
         self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
         self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
         super().__init__()
