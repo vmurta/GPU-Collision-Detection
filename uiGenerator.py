@@ -53,6 +53,7 @@ class CollisionUI(Frame):
         self.canvas.create_rectangle(1, 1, 399, 399, outline="#000", width=1)
         self.canvas.pack(fill=Y,expand=0, side=BOTTOM)
 
+    @staticmethod
     def generateNumbers():
         n = 100
         xmax = 400
@@ -66,9 +67,12 @@ class CollisionUI(Frame):
         print("rs:", rs)
         #point = random.sample(range(1,xmax), 2)
         return xs, ys, rs
-            
+
+    @staticmethod            
     def key(event):
         print("pressed", repr(event.char))
+
+    @staticmethod
     def callback(event):
         #frame.focus_set()
         print("clicked at", event.x, event.y)
