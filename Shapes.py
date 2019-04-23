@@ -2,8 +2,11 @@
 class Shape:
     pass
 
-class Ball(Shape):
-    pass
+class Circle(Shape):
+    def __init__(self, x, y, radius):
+        self.x=x
+        self.y=y
+        self.rad=radius
 
 class Box(Shape):
     pass
