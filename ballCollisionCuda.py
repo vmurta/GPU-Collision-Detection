@@ -20,6 +20,7 @@ import random
 import time
 
 from pycuda.compiler import SourceModule
+import pycuda.gpuarray as gpuarray
 from Shapes import Circle
 from tkinter import Frame, Tk
 
@@ -39,7 +40,55 @@ def generateRandomCircles(numCircles, x_range, y_range, radius_range):
     return circles
 
 def detectCollisionGPU(robot, obstacles):
-    pass
+    print("compiling kernel")
+    mod = SourceModule("""
+    __global__ void check_collisions(
+        float x_robot, float y_robot, float r_robot,
+        float *x_obs, float *y_obs, float *r_obs, 
+        bool *collisions, int *indexes)
+    {
+        int obstacleId = threadIdx.x;
+        float distance = hypotf(x_robot - x_obs[obstacleId], y_robot - y_obs[obstacleId]);
+        collisions[obstacleId] = (distance <= r_robot + r_obs[obstacleId] );
+    }
+    """)
+    print("compiled kernel")
+
+    
+    check_collisions = mod.get_function("check_collisions")
+    
+    
+    x_robot = numpy.float32(robot.x)
+    y_robot = numpy.float32(robot.y)#.astype(numpy.float32)
+    r_robot = numpy.float32(robot.rad)#.astype(numpy.float32)
+
+    #allocate memory on the gpu
+    # dev_x_robot = drv.mem_alloc(x_robot.nbytes)
+    # dev_y_robot = drv.mem_alloc(y_robot.nbytes)
+    # dev_r_robot = drv.mem_alloc(r_robot.nbytes)
+
+    x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
+    y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]).astype(numpy.float32))
+    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
+
+
+    collisions = numpy.zeros(len(obstacles), dtype=bool)
+    
+    #test array, delete later
+    indexes = numpy.zeros(len(obstacles), dtype= numpy.int32)
+
+    print(collisions)
+    gpuStart = time.time()
+    check_collisions(
+            x_robot, y_robot, r_robot,
+            x_obs_gpu, y_obs_gpu, r_obs_gpu,
+            drv.InOut(collisions), drv.InOut(indexes),
+            block=(len(obstacles),1,1), grid=(1,1))
+    print(collisions)
+    print(indexes)
+    print("gpu time taken = "+str(time.time()-gpuStart))
+
+    return collisions
 
 def detectCollisionCPU(robot, obstacles):
     pass

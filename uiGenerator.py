@@ -8,6 +8,7 @@ import numpy
 import os
 import pycuda.autoinit
 import pycuda.driver as drv
+import pycuda.gpuarray as gpuarray
 import time
 
 from pycuda.compiler import SourceModule
@@ -125,36 +126,17 @@ def main():
     root.mainloop()
     #print("final score: "+str(app.score))
     obstacles = app.getObstacles()
+    robot = app.getRobot()
     print("Detecting collisions on chosen obstacles:")
 
     #DO POINT GENERATION/COLLISION DETECTION HERE
     #collisions[i] == true implies robot is in collision with obstacle i
-    mod = SourceModule("""
-    __global__ void check_collisions(float x_robot, y_robot, r_robot,
-        float *x_obs, *y_obs, *r_obs, 
-        bool *collisions)
-    {
-        
-    }
-    """)
-    
-    check_collisions = mod.get_function("check_collisions")
-    
-    x = numpy.asarray(x).astype(numpy.float32)#nVidia only supports single precision
-    print(x)
-    y = numpy.asarray(y).astype(numpy.float32)
-    r = numpy.asarray(r).astype(numpy.float32)
-    
-    dest = numpy.empty_like(x)
-    gpuStart = time.time()
-    check_collisions(
-            drv.Out(dest), drv.In(x), drv.In(y),
-            block=(400,2,1), grid=(1,1))
-    print("gpu time taken = "+str(time.time()-gpuStart))
-    cpuStart = time.time()
-    cpuCalc = x*y
-    print("cpu time taken = "+str(time.time()-cpuStart))
-    print (dest-cpuCalc)
-    print(len(dest))
+    ballCollisionCuda.detectCollisionGPU(robot, obstacles)
+
+    # cpuStart = time.time()
+    # cpuCalc = x*y
+    # print("cpu time taken = "+str(time.time()-cpuStart))
+    # print (dest-cpuCalc)
+    # print(len(dest))
     root.destroy()
 main()
