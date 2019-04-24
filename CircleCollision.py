@@ -23,7 +23,8 @@ if os.name=='nt':
         if (os.system("cl.exe")):
             raise RuntimeError("cl.exe still not found, path probably incorrect")
 
-def generateRandomCircles(numCircles, x_range, y_range, radius_range):
+def generateRandomCircles(numCircles, x_range = range(1,400), \
+        y_range = range(1,400), radius_range = range(5,30)):
     random.seed()
     x = [random.choice(x_range) for i in range(numCircles)]
     y = [random.choice(y_range) for i in range(numCircles)]

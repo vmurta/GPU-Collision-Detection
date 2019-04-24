@@ -15,6 +15,7 @@ from pycuda.compiler import SourceModule
 from tkinter import Frame, Canvas, Tk, BOTH, Button, RIGHT, LEFT, Y, X, BOTTOM
 import random
 import CircleCollision
+import SphereCollision
 import Shapes
 from CircleCollision import generateRandomCircles
 class CollisionUI(Frame):
@@ -129,9 +130,16 @@ def main():
     robot = app.getRobot()
     print("Detecting collisions on chosen obstacles:")
 
-    #DO POINT GENERATION/COLLISION DETECTION HERE
-    #collisions[i] == true implies robot is in collision with obstacle i
-    CircleCollision.detectCollisionGPU(robot, obstacles)
+    #gpu_collisions[i] == true implies robot is in collision with obstacle i
+    gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
+
+    sphere_obstacles=SphereCollision.generateRandomSpheres()
+    sphere_robot=SphereCollision.generateRandomSpheres(numSpheres=1)[0]
+    gpu_collisions_spheres = SphereCollision.detectCollisionGPU(
+            sphere_robot, sphere_obstacles)
+    
+
+
 
     # cpuStart = time.time()
     # cpuCalc = x*y
