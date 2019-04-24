@@ -58,17 +58,19 @@ def detectCollisionGPU(robot, obstacles):
     check_collisions = mod.get_function("check_collisions")
     
     
+    #constants that will be passed directly to kernel
     x_robot = numpy.float32(robot.x)
-    y_robot = numpy.float32(robot.y)#.astype(numpy.float32)
-    r_robot = numpy.float32(robot.rad)#.astype(numpy.float32)
+    y_robot = numpy.float32(robot.y)
+    r_robot = numpy.float32(robot.rad)
 
+    #allocating arrays on the gpu for obstacle coordinates and radii
     x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
     y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]).astype(numpy.float32))
     r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
-
     print(collisions)
+    
     gpuStart = time.time()
     check_collisions(
             x_robot, y_robot, r_robot,
@@ -76,7 +78,7 @@ def detectCollisionGPU(robot, obstacles):
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
     print(collisions)
-    
+
     print("gpu time taken = "+str(time.time()-gpuStart))
 
     return collisions
