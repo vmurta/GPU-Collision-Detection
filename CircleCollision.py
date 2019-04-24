@@ -5,13 +5,6 @@ Created on Wed Apr 10 22:41:18 2019
 @author: Vosburgh
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 10 22:03:19 2019
-
-@author: Vosburgh
-"""
-
 import numpy
 import os
 import pycuda.autoinit
@@ -22,7 +15,6 @@ import time
 from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 from Shapes import Circle
-from tkinter import Frame, Tk
 
 #if on windows, try to find cl.exe
 if os.name=='nt':

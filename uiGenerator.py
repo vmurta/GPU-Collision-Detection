@@ -14,9 +14,9 @@ import time
 from pycuda.compiler import SourceModule
 from tkinter import Frame, Canvas, Tk, BOTH, Button, RIGHT, LEFT, Y, X, BOTTOM
 import random
-import ballCollisionCuda
+import CircleCollision
 import Shapes
-from ballCollisionCuda import generateRandomCircles
+from CircleCollision import generateRandomCircles
 class CollisionUI(Frame):
     def __init__(self, master):
         self.width = 400
@@ -131,7 +131,7 @@ def main():
 
     #DO POINT GENERATION/COLLISION DETECTION HERE
     #collisions[i] == true implies robot is in collision with obstacle i
-    ballCollisionCuda.detectCollisionGPU(robot, obstacles)
+    CircleCollision.detectCollisionGPU(robot, obstacles)
 
     # cpuStart = time.time()
     # cpuCalc = x*y
