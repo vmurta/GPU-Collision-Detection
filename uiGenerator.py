@@ -18,17 +18,24 @@ import CircleCollision
 import SphereCollision
 import Shapes
 from CircleCollision import generateRandomCircles
+import RectangleCollision
+from RectangleCollision import generateRandomRectangles
+
 class CollisionUI(Frame):
     def __init__(self, master):
         self.width = 400
         self.height = 400
-        self.numObstacles = 40
-        self.maxObstacleSize = 30
+        self.numObstacles = 100
+        self.maxObstacleSize = 40#60 on rectangles, 40 on circles
         x_range = range(1, self.width)
         y_range = range(1, self.height)
         radius_range = range(5,self.maxObstacleSize)
+        #circles
         self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
         self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
+        #rectangles
+        #self.obstacles = generateRandomRectangles(self.numObstacles, x_range, y_range, radius_range)
+        #self.robot = generateRandomRectangles(1, x_range, y_range, radius_range)[0]
         super().__init__()
         self.initUI(master)
 
@@ -39,7 +46,7 @@ class CollisionUI(Frame):
         frame=Frame(master)
         frame.pack()
         self.qbut = Button(
-                frame, text="Calculate", fg="red", command=frame.quit
+                frame, text="Calculate", fg="red", command=self.call_evaluation
                 )
         self.hibut = Button(
                 frame, text="Refresh", command=self.new_obstacles
@@ -58,19 +65,20 @@ class CollisionUI(Frame):
                 self.canvas.create_oval(circle.x-circle.rad,circle.y-circle.rad,circle.x+circle.rad,circle.y+circle.rad,outline="#fb0", fill="#fb0")
             #add robot to canvas
             self.canvas.create_oval(self.robot.x-self.robot.rad,self.robot.y-self.robot.rad,self.robot.x+self.robot.rad,self.robot.y+self.robot.rad,outline="#0bf", fill="#0bf")
-
+        if type(self.obstacles[0])==Shapes.Rectangle:
+            for rect in self.obstacles:
+                self.canvas.create_rectangle(rect.x1,rect.y1,rect.x2,rect.y2, outline="#fb0", fill="#fb0")
+            #add robot to canvas
+            self.canvas.create_rectangle(self.robot.x1,self.robot.y1,self.robot.x2,self.robot.y2,outline="#0bf", fill="#0bf")
         self.canvas.configure(scrollregion=(0, 0, self.width, self.height))
         self.canvas.pack(side = BOTTOM, fill=BOTH,expand=1)
-       
+    def call_evaluation(self):
+        obstacleEval(self.obstacles, self.robot, self)
     def getObstacles(self):
         return self.obstacles
 
     def getRobot(self):
         return self.robot
-
-    def say_hi(self):
-        self.score=self.score+1
-        print("score: " + str(self.score))
 
     def new_obstacles(self):
         self.canvas.delete("all")
@@ -84,11 +92,45 @@ class CollisionUI(Frame):
                 self.canvas.create_oval(circle.x-circle.rad,circle.y-circle.rad,circle.x+circle.rad,circle.y+circle.rad,outline="#fb0", fill="#fb0")
             #add robot to canvas
             self.canvas.create_oval(self.robot.x-self.robot.rad,self.robot.y-self.robot.rad,self.robot.x+self.robot.rad,self.robot.y+self.robot.rad,outline="#0bf", fill="#0bf")
-
+        if type(self.obstacles[0])==Shapes.Rectangle:
+            x_range = range(1, self.width)
+            y_range = range(1, self.height)
+            radius_range = range(1, self.maxObstacleSize)
+            self.obstacles = generateRandomRectangles(self.numObstacles,x_range, y_range, radius_range)
+            # add obstacles to canvas
+            for rect in self.obstacles:
+                self.canvas.create_rectangle(rect.x1,rect.y1,rect.x2,rect.y2, outline="#fb0", fill="#fb0")
+            #add robot to canvas
+            self.canvas.create_rectangle(self.robot.x1,self.robot.y1,self.robot.x2,self.robot.y2,outline="#0bf", fill="#0bf")
        
         self.canvas.create_rectangle(1, 1, 399, 399, outline="#000", width=1)
         self.canvas.pack(fill=Y,expand=0, side=BOTTOM)
-
+    def draw_collisions(self, colls):
+        print("Drawing collisions...")
+        if type(self.obstacles[0])==Shapes.Circle:
+            i=0
+            print(len(self.obstacles))
+            print(len(colls))
+            while i < len(colls):
+                status = colls[i]
+                if status:
+                    circle = self.obstacles[i]
+                    self.canvas.create_oval(circle.x-circle.rad,circle.y-circle.rad,circle.x+circle.rad,circle.y+circle.rad,outline="red", fill="#fb0")
+                i=i+1
+            #re-add robot to canvas
+            self.canvas.create_oval(self.robot.x-self.robot.rad,self.robot.y-self.robot.rad,self.robot.x+self.robot.rad,self.robot.y+self.robot.rad,outline="#0bf", fill="#0bf")
+        if type(self.obstacles[0])==Shapes.Rectangle:
+            i=0
+            print(len(self.obstacles))
+            print(len(colls))
+            while i < len(colls):
+                status = colls[i]
+                if status:
+                    rect = self.obstacles[i]
+                    self.canvas.create_rectangle(rect.x1,rect.y1,rect.x2,rect.y2, outline="red", fill="#fb0")
+                i=i+1
+            #re-add robot to canvas
+            self.canvas.create_rectangle(self.robot.x1,self.robot.y1,self.robot.x2,self.robot.y2,outline="#0bf", fill="#0bf")
     # @staticmethod
     # def generateNumbers():
     #     n = 100
@@ -104,39 +146,39 @@ class CollisionUI(Frame):
     #     #point = random.sample(range(1,xmax), 2)
     #     return xs, ys, rs
 
-def key(event):
-    print("pressed", repr(event.char))
-
-def callback(event):
-    #frame.focus_set()
-    print("clicked at", event.x, event.y)
-
+def obstacleEval(obstacles, robot, app):
+    print("Detecting collisions on chosen obstacles:")
+    #gpu_collisions[i] == true implies robot is in collision with obstacle i
+    if type(obstacles[0])==Shapes.Circle:
+        gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
+        app.draw_collisions(gpu_collisions_circles)
+    if type(obstacles[0])==Shapes.Rectangle:
+        gpu_collisions_rectangles = RectangleCollision.detectCollisionGPU(robot, obstacles)
+        app.draw_collisions(gpu_collisions_rectangles)
 def main():
     
     root = Tk()
     app = CollisionUI(root)
     frame = Frame(root, width=100, height=400)
-    frame.bind("<Key>", key)
-    frame.bind("<Button-1>", callback)
     frame.focus_set()
     frame.pack()
     #w = Label(root, text="Hello world!")
     
-    #w.pack()
+    #w.pack() 
     root.geometry("400x400")
     root.mainloop()
-    #print("final score: "+str(app.score))
     obstacles = app.getObstacles()
     robot = app.getRobot()
     print("Detecting collisions on chosen obstacles:")
-
+    
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
-    gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
 
-    sphere_obstacles=SphereCollision.generateRandomSpheres()
-    sphere_robot=SphereCollision.generateRandomSpheres(numSpheres=1)[0]
-    gpu_collisions_spheres = SphereCollision.detectCollisionGPU(
-            sphere_robot, sphere_obstacles)
+    #gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
+
+    #sphere_obstacles=SphereCollision.generateRandomSpheres()
+    #sphere_robot=SphereCollision.generateRandomSpheres(numSpheres=1)[0]
+    #gpu_collisions_spheres = SphereCollision.detectCollisionGPU(
+    #        sphere_robot, sphere_obstacles)
     
 
 
