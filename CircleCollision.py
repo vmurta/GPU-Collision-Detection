@@ -38,7 +38,7 @@ def detectCollisionGPU(robot, obstacles):
     __global__ void check_collisions(
         float x_robot, float y_robot, float r_robot,
         float *x_obs, float *y_obs, float *r_obs, 
-        bool *collisions, int *indexes)
+        bool *collisions)
     {
         int obstacleId = threadIdx.x;
         float distance = hypotf(x_robot - x_obs[obstacleId], y_robot - y_obs[obstacleId]);
