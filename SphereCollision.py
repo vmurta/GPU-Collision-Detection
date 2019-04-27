@@ -21,7 +21,8 @@ def generateRandomSpheres(numSpheres=100, x_range = range(1,5), \
     spheres = [Sphere(x[i],y[i],z[i], rad[i]) for i in range(numSpheres)]
     return spheres
 
-#TODO
+#TODO test to see if i can get this faster by squaring the x, y, and z distances
+# and comparing against radius squared
 def detectCollisionGPU(robot, obstacles):
 
     mod = SourceModule("""
@@ -42,16 +43,16 @@ def detectCollisionGPU(robot, obstacles):
     
     
     #constants that will be passed directly to kernel
-    x_robot = numpy.float32(robot.x)
-    y_robot = numpy.float32(robot.y)
-    z_robot = numpy.float32(robot.z)
-    r_robot = numpy.float32(robot.rad)
+    x_robot = robot.x
+    y_robot = robot.y
+    z_robot = robot.z
+    r_robot = robot.rad
 
     #allocating arrays on the gpu for obstacle coordinates and radii
-    x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
-    y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]).astype(numpy.float32))
-    z_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.z for circle in obstacles]).astype(numpy.float32))
-    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
+    x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]))#nVidia only supports single precision)
+    y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]))
+    z_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.z for circle in obstacles]))
+    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles])
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
     print("Sphere Info")
@@ -64,7 +65,6 @@ def detectCollisionGPU(robot, obstacles):
             x_obs_gpu, y_obs_gpu, z_obs_gpu, r_obs_gpu,
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
-    print(collisions)
 
     print("gpu time taken = "+str(time.time()-gpuStart))
 
@@ -76,10 +76,10 @@ def detectCollisionCPU(robot, obstacles):
     cpuStart = time.time()
     collisions = [False]*len(obstacles)
     i = 0
-    x_robot = numpy.float32(robot.x)
-    y_robot = numpy.float32(robot.y)
-    z_robot = numpy.float32(robot.z)
-    r_robot = numpy.float32(robot.rad)
+    x_robot = robot.x
+    y_robot = robot.y
+    z_robot = robot.z
+    r_robot = robot.rad
     while i < len(obstacles):
         obs = obstacles[i]
         distance = numpy.sqrt((x_robot-obs.x)**2 + (y_robot-obs.y)**2 + (z_robot-obs.z)**2)

@@ -44,11 +44,18 @@ def detectCollisionGPU(robot, obstacles):
     __global__ void check_collisions(
         float x1_robot, float y1_robot, float x2_robot, float y2_robot,
         float *x1_obs, float *y1_obs, float *x2_obs, float *y2_obs,
-        bool *collisions, int *indexes)
+        bool *collisions)
     {
         int obstacleId = threadIdx.x;
-        bool xcol = ((x1_obs[obstacleId] <= x1_robot && x1_robot <= x2_obs[obstacleId])|| (x1_obs[obstacleId] <= x2_robot && x2_robot <= x2_obs[obstacleId])) || ( x1_robot <= x1_obs[obstacleId] && x2_robot >= x2_obs[obstacleId]);
-        bool ycol = ((y1_obs[obstacleId] <= y1_robot && y1_robot <= y2_obs[obstacleId])|| (y1_obs[obstacleId] <= y2_robot && y2_robot <= y2_obs[obstacleId])) || ( y1_robot <= y1_obs[obstacleId] && y2_robot >= y2_obs[obstacleId]);
+        
+        bool xcol = ((x1_obs[obstacleId] <= x1_robot && x1_robot <= x2_obs[obstacleId]) 
+                || (x1_obs[obstacleId] <= x2_robot && x2_robot <= x2_obs[obstacleId])) 
+                || ( x1_robot <= x1_obs[obstacleId] && x2_robot >= x2_obs[obstacleId]);
+
+        bool ycol = ((y1_obs[obstacleId] <= y1_robot && y1_robot <= y2_obs[obstacleId]) 
+                || (y1_obs[obstacleId] <= y2_robot && y2_robot <= y2_obs[obstacleId])) 
+                || ( y1_robot <= y1_obs[obstacleId] && y2_robot >= y2_obs[obstacleId]);
+
         collisions[obstacleId] = (xcol && ycol);
     }
     """)
@@ -59,20 +66,18 @@ def detectCollisionGPU(robot, obstacles):
     
     
     #constants that will be passed directly to kernel
-    x1_robot = numpy.float32(robot.x1)
-    y1_robot = numpy.float32(robot.y1)
-    x2_robot = numpy.float32(robot.x2)
-    y2_robot = numpy.float32(robot.y2)
+    x1_robot = robot.x1
+    y1_robot = robot.y1
+    x2_robot = robot.x2
+    y2_robot = robot.y2
     #allocating arrays on the gpu for obstacle coordinates and radii
-    x1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x1 for rectangle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
-    y1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y1 for rectangle in obstacles]).astype(numpy.float32))
-    x2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x2 for rectangle in obstacles]).astype(numpy.float32))
-    y2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y2 for rectangle in obstacles]).astype(numpy.float32))
+    x1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x1 for rectangle in obstacles]))#nVidia only supports single precision)
+    y1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y1 for rectangle in obstacles]))
+    x2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x2 for rectangle in obstacles]))
+    y2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y2 for rectangle in obstacles]))
 
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
-    #print(collisions)
-    
     gpuStart = time.time()
     check_collisions(
             x1_robot, y1_robot, x2_robot, y2_robot,
@@ -106,4 +111,3 @@ def detectCollisionCPU(robot, obstacles):
     print("cpu time taken = "+str(time.time()-cpuStart))
     #print(collisions)
     return collisions
-

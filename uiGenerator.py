@@ -14,9 +14,10 @@ import time
 from pycuda.compiler import SourceModule
 from tkinter import Frame, Canvas, Tk, BOTH, Button, RIGHT, LEFT, Y, X, BOTTOM
 import random
+import Shapes
 import CircleCollision
 import SphereCollision
-import Shapes
+import BoxCollision
 from CircleCollision import generateRandomCircles
 import RectangleCollision
 from RectangleCollision import generateRandomRectangles
@@ -177,7 +178,7 @@ def main():
     obstacles = app.getObstacles()
     robot = app.getRobot()
     print("Detecting collisions on chosen obstacles:")
-    
+
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
 
     #gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
