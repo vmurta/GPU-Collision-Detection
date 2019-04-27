@@ -171,10 +171,6 @@ def main():
     obstacles = app.getObstacles()
     robot = app.getRobot()
     print("Detecting collisions on chosen obstacles:")
-    
-    box_obstacles = BoxCollision.generateRandomBoxes(numBoxes=100)
-    box_robot = BoxCollision.generateRandomBoxes(numBoxes=1)[0]
-    box_collisions = BoxCollision.detectCollisionGPU(box_robot,box_obstacles)
 
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
 

@@ -64,8 +64,7 @@ def detectCollisionGPU(robot, obstacles):
             x_obs_gpu, y_obs_gpu, z_obs_gpu, r_obs_gpu,
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
-    print(collisions)
-
+            
     print("gpu time taken = "+str(time.time()-gpuStart))
 
     return collisions

@@ -62,7 +62,6 @@ def detectCollisionGPU(robot, obstacles):
     r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
-    print(collisions)
     
     gpuStart = time.time()
     check_collisions(

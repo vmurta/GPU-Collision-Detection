@@ -86,7 +86,6 @@ def detectCollisionGPU(robot, obstacles):
 
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
-    print(collisions)
     
     gpuStart = time.time()
     check_collisions(
