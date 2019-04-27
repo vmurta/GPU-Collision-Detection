@@ -52,7 +52,7 @@ def detectCollisionGPU(robot, obstacles):
     x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]))#nVidia only supports single precision)
     y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]))
     z_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.z for circle in obstacles]))
-    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles])
+    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]))
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
     print("Sphere Info")

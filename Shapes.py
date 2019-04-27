@@ -6,6 +6,7 @@
 #2) don't take square roots when computing kernels, instead just square other thing you're 
 #   comparing too 
 import numpy
+from open3d  import *
 
 class Shape:
     pass
@@ -40,3 +41,26 @@ class Box(Shape):
         self.x2=numpy.float32(x2)
         self.y2=numpy.float32(y2)
         self.z2=numpy.float32(z2)
+
+class Mesh(Shape):
+    def __init__(self, path_to_file):
+        mesh = read_triangle_mesh(path_to_file)
+        self.vertices = numpy.asarray(mesh.vertices, dtype=numpy.float32)
+        self.triangles = numpy.asarray(mesh.triangles, dtype=numpy.int32)
+    
+    @staticmethod
+    def getBoundingBox(mesh):
+        vertices = mesh.vertices
+        x1 = min(vertices, key = lambda t : t[0])[0]
+        x2 = max(vertices, key = lambda t : t[0])[0]
+        y1 = min(vertices, key = lambda t : t[1])[1]
+        y2 = max(vertices, key = lambda t : t[1])[1]
+        z1 = min(vertices, key = lambda t : t[2])[2]
+        z2 = max(vertices, key = lambda t : t[2])[2]
+        return Box(x1, y1, z1, x2, y2, z2)
+
+
+test = Mesh("Meshes/knot.ply")
+print(test.triangles)
+print(test.vertices)
+Mesh.getBoundingBox(test)
