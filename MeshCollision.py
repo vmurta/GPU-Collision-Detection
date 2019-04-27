@@ -15,4 +15,7 @@ if os.name=='nt':
         if (os.system("cl.exe")):
             raise RuntimeError("cl.exe still not found, path probably incorrect")
 
+#sort and sweep might be useless, no need to sort obstacles if we're only checking collision against
+# a single mesh (the robot)
 def sortAndSweep(robot, obstacles)
+    pass

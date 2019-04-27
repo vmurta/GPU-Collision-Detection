@@ -66,15 +66,15 @@ def detectCollisionGPU(robot, obstacles):
     
     
     #constants that will be passed directly to kernel
-    x1_robot = numpy.float32(robot.x1)
-    y1_robot = numpy.float32(robot.y1)
-    x2_robot = numpy.float32(robot.x2)
-    y2_robot = numpy.float32(robot.y2)
+    x1_robot = robot.x1
+    y1_robot = robot.y1
+    x2_robot = robot.x2
+    y2_robot = robot.y2
     #allocating arrays on the gpu for obstacle coordinates and radii
-    x1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x1 for rectangle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
-    y1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y1 for rectangle in obstacles]).astype(numpy.float32))
-    x2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x2 for rectangle in obstacles]).astype(numpy.float32))
-    y2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y2 for rectangle in obstacles]).astype(numpy.float32))
+    x1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x1 for rectangle in obstacles]))#nVidia only supports single precision)
+    y1_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y1 for rectangle in obstacles]))
+    x2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.x2 for rectangle in obstacles]))
+    y2_obs_gpu = gpuarray.to_gpu(numpy.asarray([rectangle.y2 for rectangle in obstacles]))
 
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)

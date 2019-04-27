@@ -52,14 +52,14 @@ def detectCollisionGPU(robot, obstacles):
     
     
     #constants that will be passed directly to kernel
-    x_robot = numpy.float32(robot.x)
-    y_robot = numpy.float32(robot.y)
-    r_robot = numpy.float32(robot.rad)
+    x_robot = robot.x
+    y_robot = robot.y
+    r_robot = robot.rad
 
     #allocating arrays on the gpu for obstacle coordinates and radii
-    x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]).astype(numpy.float32))#nVidia only supports single precision)
-    y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]).astype(numpy.float32))
-    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
+    x_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.x for circle in obstacles]))#nVidia only supports single precision)
+    y_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.y for circle in obstacles]))
+    r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]))
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
     
