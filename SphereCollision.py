@@ -71,6 +71,20 @@ def detectCollisionGPU(robot, obstacles):
     return collisions
 
 
-#TODO
+#not tested, based on success of the circle one should be good to go
 def detectCollisionCPU(robot, obstacles):
-    pass
+    cpuStart = time.time()
+    collisions = [False]*len(obstacles)
+    i = 0
+    x_robot = numpy.float32(robot.x)
+    y_robot = numpy.float32(robot.y)
+    z_robot = numpy.float32(robot.z)
+    r_robot = numpy.float32(robot.rad)
+    while i < len(obstacles):
+        obs = obstacles[i]
+        distance = numpy.sqrt((x_robot-obs.x)**2 + (y_robot-obs.y)**2 + (z_robot-obs.z)**2)
+        collisions[i]= (distance <= r_robot + obs.rad)
+        i=i+1
+    print("cpu time taken = "+str(time.time()-cpuStart))
+    #print(collisions)
+    return collisions

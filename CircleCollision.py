@@ -62,7 +62,7 @@ def detectCollisionGPU(robot, obstacles):
     r_obs_gpu = gpuarray.to_gpu(numpy.asarray([circle.rad for circle in obstacles]).astype(numpy.float32))
 
     collisions = numpy.zeros(len(obstacles), dtype=bool)
-    print(collisions)
+    #print(collisions)
     
     gpuStart = time.time()
     check_collisions(
@@ -70,12 +70,26 @@ def detectCollisionGPU(robot, obstacles):
             x_obs_gpu, y_obs_gpu, r_obs_gpu,
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
-    print(collisions)
 
     print("gpu time taken = "+str(time.time()-gpuStart))
+    #print(collisions)
 
     return collisions
 
 def detectCollisionCPU(robot, obstacles):
-    pass
+    cpuStart = time.time()
+    collisions = [False]*len(obstacles)
+    i = 0
+    x_robot = numpy.float32(robot.x)
+    y_robot = numpy.float32(robot.y)
+    r_robot = numpy.float32(robot.rad)
+    while i < len(obstacles):
+        obs = obstacles[i]
+        distance = numpy.sqrt((x_robot-obs.x)**2 + (y_robot-obs.y)**2)
+        collisions[i]= (distance <= r_robot + obs.rad)
+        i=i+1
+    print("cpu time taken = "+str(time.time()-cpuStart))
+    #print(collisions)
+    return collisions
+
 

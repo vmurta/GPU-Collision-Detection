@@ -25,17 +25,17 @@ class CollisionUI(Frame):
     def __init__(self, master):
         self.width = 400
         self.height = 400
-        self.numObstacles = 100
-        self.maxObstacleSize = 40#60 on rectangles, 40 on circles
+        self.numObstacles = 1000
+        self.maxObstacleSize = 60#60 on rectangles, 40 on circles
         x_range = range(1, self.width)
         y_range = range(1, self.height)
         radius_range = range(5,self.maxObstacleSize)
         #circles
-        self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
-        self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
+        #self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
+        #self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
         #rectangles
-        #self.obstacles = generateRandomRectangles(self.numObstacles, x_range, y_range, radius_range)
-        #self.robot = generateRandomRectangles(1, x_range, y_range, radius_range)[0]
+        self.obstacles = generateRandomRectangles(self.numObstacles, x_range, y_range, radius_range)
+        self.robot = generateRandomRectangles(1, x_range, y_range, radius_range)[0]
         super().__init__()
         self.initUI(master)
 
@@ -109,8 +109,8 @@ class CollisionUI(Frame):
         print("Drawing collisions...")
         if type(self.obstacles[0])==Shapes.Circle:
             i=0
-            print(len(self.obstacles))
-            print(len(colls))
+            #print(len(self.obstacles))
+            #print(len(colls))
             while i < len(colls):
                 status = colls[i]
                 if status:
@@ -131,6 +131,7 @@ class CollisionUI(Frame):
                 i=i+1
             #re-add robot to canvas
             self.canvas.create_rectangle(self.robot.x1,self.robot.y1,self.robot.x2,self.robot.y2,outline="#0bf", fill="#0bf")
+        print("Collisions Drawn")
     # @staticmethod
     # def generateNumbers():
     #     n = 100
@@ -150,10 +151,16 @@ def obstacleEval(obstacles, robot, app):
     print("Detecting collisions on chosen obstacles:")
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
     if type(obstacles[0])==Shapes.Circle:
+        cpu_collisions_circles = CircleCollision.detectCollisionCPU(robot, obstacles)
         gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
+        if((cpu_collisions_circles != gpu_collisions_circles).all()):
+            print("difference of opinion, assume collision detection failed")
         app.draw_collisions(gpu_collisions_circles)
     if type(obstacles[0])==Shapes.Rectangle:
         gpu_collisions_rectangles = RectangleCollision.detectCollisionGPU(robot, obstacles)
+        cpu_collisions_rectangles = RectangleCollision.detectCollisionCPU(robot, obstacles)
+        if((cpu_collisions_rectangles != gpu_collisions_rectangles).all()):
+            print("difference of opinion, assume collision detection failed")
         app.draw_collisions(gpu_collisions_rectangles)
 def main():
     
