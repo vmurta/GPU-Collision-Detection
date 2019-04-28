@@ -93,10 +93,35 @@ def detectCollisionGPU(robot, obstacles):
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
     print(collisions)
+    duration = time.time()-gpuStart
+    #print("gpu time taken = "+str(time.time()-gpuStart))
 
-    print("gpu time taken = "+str(time.time()-gpuStart))
-
-    return collisions
+    return collisions, duration
 
 def detectCollisionCPU(robot, obstacles):
-    pass
+    cpuStart = time.time()
+    collisions = [False]*len(obstacles)
+    i = 0
+    x1_robot = robot.x1
+    y1_robot = robot.y1
+    z1_robot = robot.z1
+    x2_robot = robot.x2
+    y2_robot = robot.y2
+    z2_robot = robot.z2
+    while i < len(obstacles):
+        obs = obstacles[i]
+        x1_obs = obs.x1
+        y1_obs = obs.y1
+        z1_obs = obs.z1
+        x2_obs = obs.x2
+        y2_obs = obs.y2
+        z2_obs = obs.z2
+        xcol = ((x1_obs <= x1_robot and x1_robot <= x2_obs) or (x1_obs <= x2_robot and x2_robot <= x2_obs)) or ( x1_robot <= x1_obs and x2_robot >= x2_obs)
+        ycol = ((y1_obs <= y1_robot and y1_robot <= y2_obs) or (y1_obs <= y2_robot and y2_robot <= y2_obs)) or ( y1_robot <= y1_obs and y2_robot >= y2_obs)
+        ycol = ((y1_obs <= z1_robot and z1_robot <= z2_obs) or (z1_obs <= z2_robot and z2_robot <= z2_obs)) or ( z1_robot <= z1_obs and z2_robot >= z2_obs)
+        collisions[i]= xcol and ycol and zcol
+        i=i+1
+    duration = time.time()-cpuStart
+    #print("cpu time taken = "+str(duration))
+    #print(collisions)
+    return collisions, duration
