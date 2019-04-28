@@ -1,10 +1,8 @@
 #parent class for each shape object that obstacles 
 #ideas to make stuff faster:
-#1) cast everything as a np.float32 when calling constructor, that way collision 
-#   avoiding the costly cast each time we try to run gpu collision
-#
-#2) don't take square roots when computing kernels, instead just square other thing you're 
+#1) don't take square roots when computing kernels, instead just square other thing you're 
 #   comparing too 
+# use more memory: store some number of bounding boxes with the mesh itself
 import numpy
 from open3d  import *
 
@@ -48,19 +46,32 @@ class Mesh(Shape):
         self.vertices = numpy.asarray(mesh.vertices, dtype=numpy.float32)
         self.triangles = numpy.asarray(mesh.triangles, dtype=numpy.int32)
     
+    #takes in a list of Mesh objects and combutes an axis aligned bounding box for each
     @staticmethod
-    def getBoundingBox(mesh):
-        vertices = mesh.vertices
-        x1 = min(vertices, key = lambda t : t[0])[0]
-        x2 = max(vertices, key = lambda t : t[0])[0]
-        y1 = min(vertices, key = lambda t : t[1])[1]
-        y2 = max(vertices, key = lambda t : t[1])[1]
-        z1 = min(vertices, key = lambda t : t[2])[2]
-        z2 = max(vertices, key = lambda t : t[2])[2]
+    def getBoundingBoxesCPU(meshes):
+        x1 = numpy.zeros(len(meshes))
+        y1 = numpy.zeros(len(meshes))
+        z1 = numpy.zeros(len(meshes))
+        x2 = numpy.zeros(len(meshes))
+        y2 = numpy.zeros(len(meshes))
+        z2 = numpy.zeros(len(meshes))
+
+        x_lambda = lambda t : t[0]
+        y_lambda = lambda t : t[1]
+        z_lambda = lambda t : t[2]
+
+        for i in range( len(meshes)):    
+            vertices = meshes[i].vertices
+            x1[i] = min(vertices, key = x_lambda)[0]
+            x2[i] = max(vertices, key = x_lambda)[0]
+            y1[i] = min(vertices, key = y_lambda)[1]
+            y2[i] = max(vertices, key = y_lambda)[1]
+            z1[i] = min(vertices, key = z_lambda)[2]
+            z2[i] = max(vertices, key = z_lambda)[2]
         return Box(x1, y1, z1, x2, y2, z2)
 
 
 test = Mesh("Meshes/knot.ply")
 print(test.triangles)
 print(test.vertices)
-Mesh.getBoundingBox(test)
+Mesh.getBoundingBoxesCPU([test])
