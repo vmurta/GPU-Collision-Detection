@@ -90,14 +90,7 @@ def obstacleEval(obstacles, robot, app):
         if((cpu_collisions_rectangles != gpu_collisions_rectangles).all()):
             print("difference of opinion, assume collision detection failed")
     return cpu_time, gpu_time
-def main():
-    
-    #w = Label(root, text="Hello world!")
-    app = CollisionTest()
-    #w.pack() 
-    obstacles = app.getObstacles()
-    robot = app.getRobot()
-    print("Detecting collisions on chosen obstacles:")
+def runTests(app):
     testCount = 100
     cpuTimes = numpy.zeros(testCount)
     gpuTimes = numpy.zeros(testCount)
@@ -106,12 +99,24 @@ def main():
         cpuTimes[i], gpuTimes[i] = app.call_evaluation()
         app.new_obstacles()
         i=i+1
-    print(cpuTimes)
-    print(gpuTimes)
+    #print(cpuTimes)
+    #print(gpuTimes)
     totalCpu = sum(cpuTimes)
     totalGpu = sum(gpuTimes)
     print("cpu time taken = "+str(totalCpu))
     print("gpu time taken = "+str(totalGpu))
+def main():
+    
+    #w = Label(root, text="Hello world!")
+    b = 0
+    while b < 10:
+        print("Test #"+str(b))
+        app = CollisionTest()
+        runTests(app)
+        b=b+1
+    #w.pack() 
+    #obstacles = app.getObstacles()
+    #robot = app.getRobot()
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
 
     #gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
