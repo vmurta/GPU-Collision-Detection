@@ -37,7 +37,7 @@ def generateRandomBoxes(numBoxes, x_range = range(1,5), \
     return boxes
 
 def detectCollisionGPU(robot, obstacles):
-    print("compiling kernel")
+    #print("compiling kernel")
     mod = SourceModule("""
     __global__ void check_collisions(
         float x1_robot, float y1_robot, float z1_robot,
@@ -63,7 +63,7 @@ def detectCollisionGPU(robot, obstacles):
         collisions[obstacleId] = (xcol && ycol && zcol);
     }
     """)
-    print("compiled kernel")
+    #print("compiled kernel")
 
     
     check_collisions = mod.get_function("check_collisions")
@@ -92,7 +92,7 @@ def detectCollisionGPU(robot, obstacles):
             x1_obs_gpu, y1_obs_gpu, z1_obs_gpu, x2_obs_gpu, y2_obs_gpu, z2_obs_gpu,
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
-    print(collisions)
+    #print(collisions)
     duration = time.time()-gpuStart
     #print("gpu time taken = "+str(time.time()-gpuStart))
 

@@ -33,7 +33,7 @@ def generateRandomCircles(numCircles, x_range = range(1,400), \
     return circles
 
 def detectCollisionGPU(robot, obstacles):
-    print("compiling kernel")
+    #print("compiling kernel")
     mod = SourceModule("""
     __global__ void check_collisions(
         float x_robot, float y_robot, float r_robot,
@@ -45,7 +45,7 @@ def detectCollisionGPU(robot, obstacles):
         collisions[obstacleId] = (distance <= r_robot + r_obs[obstacleId] );
     }
     """)
-    print("compiled kernel")
+    #print("compiled kernel")
 
     
     check_collisions = mod.get_function("check_collisions")

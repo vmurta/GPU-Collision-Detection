@@ -26,7 +26,7 @@ class CollisionUI(Frame):
     def __init__(self, master):
         self.width = 400
         self.height = 400
-        self.numObstacles = 1000
+        self.numObstacles = 100
         self.maxObstacleSize = 60#60 on rectangles, 40 on circles
         x_range = range(1, self.width)
         y_range = range(1, self.height)
@@ -122,8 +122,8 @@ class CollisionUI(Frame):
             self.canvas.create_oval(self.robot.x-self.robot.rad,self.robot.y-self.robot.rad,self.robot.x+self.robot.rad,self.robot.y+self.robot.rad,outline="#0bf", fill="#0bf")
         if type(self.obstacles[0])==Shapes.Rectangle:
             i=0
-            print(len(self.obstacles))
-            print(len(colls))
+            #print(len(self.obstacles))
+            #print(len(colls))
             while i < len(colls):
                 status = colls[i]
                 if status:
@@ -152,14 +152,14 @@ def obstacleEval(obstacles, robot, app):
     print("Detecting collisions on chosen obstacles:")
     #gpu_collisions[i] == true implies robot is in collision with obstacle i
     if type(obstacles[0])==Shapes.Circle:
-        cpu_collisions_circles = CircleCollision.detectCollisionCPU(robot, obstacles)
-        gpu_collisions_circles = CircleCollision.detectCollisionGPU(robot, obstacles)
+        cpu_collisions_circles, gpu_time = CircleCollision.detectCollisionCPU(robot, obstacles)
+        gpu_collisions_circles, cpu_time = CircleCollision.detectCollisionGPU(robot, obstacles)
         if((cpu_collisions_circles != gpu_collisions_circles).all()):
             print("difference of opinion, assume collision detection failed")
         app.draw_collisions(gpu_collisions_circles)
     if type(obstacles[0])==Shapes.Rectangle:
-        gpu_collisions_rectangles = RectangleCollision.detectCollisionGPU(robot, obstacles)
-        cpu_collisions_rectangles = RectangleCollision.detectCollisionCPU(robot, obstacles)
+        gpu_collisions_rectangles, gpu_time = RectangleCollision.detectCollisionGPU(robot, obstacles)
+        cpu_collisions_rectangles, cpu_time = RectangleCollision.detectCollisionCPU(robot, obstacles)
         if((cpu_collisions_rectangles != gpu_collisions_rectangles).all()):
             print("difference of opinion, assume collision detection failed")
         app.draw_collisions(gpu_collisions_rectangles)

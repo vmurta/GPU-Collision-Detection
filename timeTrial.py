@@ -14,6 +14,7 @@ import CircleCollision
 import SphereCollision
 from SphereCollision import generateRandomSpheres
 import BoxCollision
+from BoxCollision import generateRandomBoxes
 from CircleCollision import generateRandomCircles
 import RectangleCollision
 from RectangleCollision import generateRandomRectangles
@@ -31,8 +32,9 @@ class CollisionTest():
         #self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
         #self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
         #rectangles
-        self.obstacles = generateRandomSpheres(self.numObstacles)
-        self.robot = generateRandomSpheres(1) [0]
+        self.new_obstacles()
+        #self.obstacles = generateRandomSpheres(self.numObstacles)
+        #self.robot = generateRandomSpheres(1) [0]
 
     def call_evaluation(self):
         return obstacleEval(self.obstacles, self.robot, self)
@@ -43,18 +45,28 @@ class CollisionTest():
     def getRobot(self):
         return self.robot
 
-    def new_obstacles(self):
-        if type(self.obstacles[0])==Shapes.Circle:
+    def new_obstacles(self, id=0):
+        if id==0:
             x_range = range(1, self.width)
             y_range = range(1, self.height)
             radius_range = range(1, self.maxObstacleSize)
             self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
+            self.robot = generateRandomCircles(1) [0]
 
-        if type(self.obstacles[0])==Shapes.Rectangle:
+        if id==1:
             x_range = range(1, self.width)
             y_range = range(1, self.height)
             radius_range = range(1, self.maxObstacleSize)
             self.obstacles = generateRandomRectangles(self.numObstacles,x_range, y_range, radius_range)
+            self.robot = generateRandomRectangles(1) [0]
+
+        if id==2:
+            self.obstacles = generateRandomSpheres(self.numObstacles)
+            self.robot = generateRandomSpheres(1) [0]
+
+        if id==3:
+            self.obstacles = generateRandomBoxes(self.numObstacles)
+            self.robot = generateRandomBoxes(1) [0]
        
     # @staticmethod
     # def generateNumbers():
@@ -94,20 +106,25 @@ def obstacleEval(obstacles, robot, app):
         if((cpu_collisions_sphere != gpu_collisions_sphere).all()):
             print("difference of opinion, assume collision detection failed")
 
+    if type(obstacles[0])==Shapes.Box:
+        cpu_collisions_box, cpu_time = BoxCollision.detectCollisionCPU(robot, obstacles)
+        gpu_collisions_box, gpu_time = BoxCollision.detectCollisionGPU(robot, obstacles)
+        if((cpu_collisions_box != gpu_collisions_box).all()):
+            print("difference of opinion, assume collision detection failed")
     # print (cpu_time, gpu_time)
 
     return cpu_time, gpu_time
-def runTests(app):
+def runTests(app, shapeId):
     testCount = 100
     cpuTimes = numpy.zeros(testCount)
     gpuTimes = numpy.zeros(testCount)
     i = 0
     while i < 100:
         cpuTimes[i], gpuTimes[i] = app.call_evaluation()
-        app.new_obstacles()
+        app.new_obstacles(shapeId)
         i=i+1
-    print(cpuTimes)
-    print(gpuTimes)
+    #print(cpuTimes)
+    #print(gpuTimes)
 
     totalCpu = sum(cpuTimes)
     totalGpu = sum(gpuTimes)
@@ -117,10 +134,19 @@ def main():
     
     #w = Label(root, text="Hello world!")
     b = 0
-    while b < 10:
-        print("Test #"+str(b))
+    while b < 4:
+        shape = 're'
+        if b == 0:
+            shape = "circles"
+        if b == 1:
+            shape = "rectangles"
+        if b == 2:
+            shape = "spheres"
+        if b == 3:
+            shape = "boxes"
+        print("Test #"+str(b)+ ": " +shape)
         app = CollisionTest()
-        runTests(app)
+        runTests(app, b)
         b=b+1
     #w.pack() 
     #obstacles = app.getObstacles()
