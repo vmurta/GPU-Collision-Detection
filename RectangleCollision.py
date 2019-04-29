@@ -39,7 +39,7 @@ def generateRandomRectangles(numRectangles, x_range = range(1,400), y_range = ra
     return rectangles   
 
 def detectCollisionGPU(robot, obstacles):
-    print("compiling kernel")
+    #print("compiling kernel")
     mod = SourceModule("""
     __global__ void check_collisions(
         float x1_robot, float y1_robot, float x2_robot, float y2_robot,
@@ -59,7 +59,7 @@ def detectCollisionGPU(robot, obstacles):
         collisions[obstacleId] = (xcol && ycol);
     }
     """)
-    print("compiled kernel")
+    #print("compiled kernel")
 
     
     check_collisions = mod.get_function("check_collisions")
@@ -85,19 +85,19 @@ def detectCollisionGPU(robot, obstacles):
             drv.InOut(collisions),
             block=(len(obstacles),1,1), grid=(1,1))
     
-
-    print("gpu time taken = "+str(time.time()-gpuStart))
+    duration = time.time()-gpuStart
+    #print("gpu time taken = "+str(duration))
     #print(collisions)
-    return collisions
+    return collisions, duration
 
 def detectCollisionCPU(robot, obstacles):
     cpuStart = time.time()
     collisions = [False]*len(obstacles)
     i = 0
-    x1_robot = numpy.float32(robot.x1)
-    y1_robot = numpy.float32(robot.y1)
-    x2_robot = numpy.float32(robot.x2)
-    y2_robot = numpy.float32(robot.y2)
+    x1_robot = robot.x1
+    y1_robot = robot.y1
+    x2_robot = robot.x2
+    y2_robot = robot.y2
     while i < len(obstacles):
         obs = obstacles[i]
         x1_obs = obs.x1
@@ -108,6 +108,7 @@ def detectCollisionCPU(robot, obstacles):
         ycol = ((y1_obs <= y1_robot and y1_robot <= y2_obs) or (y1_obs <= y2_robot and y2_robot <= y2_obs)) or ( y1_robot <= y1_obs and y2_robot >= y2_obs)
         collisions[i]= xcol and ycol
         i=i+1
-    print("cpu time taken = "+str(time.time()-cpuStart))
+    duration = time.time()-cpuStart
+    #print("cpu time taken = "+str(duration))
     #print(collisions)
-    return collisions
+    return collisions, duration
