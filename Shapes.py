@@ -51,8 +51,12 @@ class Mesh(Shape):
             self.triangles = numpy.asarray(mesh.triangles, dtype=numpy.int32)
     
     def getUniqueVertices(self):
-        shape = self.vertices[self.triangles].shape
-        myset = set(tuple(i) for i in self.vertices[self.triangles].reshape(shape[0]*shape[1], shape[2]))
+        # print(self.triangles)
+        # print(self.vertices)
+        current_vertices_redundant = numpy.array([self.vertices[triangle] for triangle in self.triangles])
+        shape = current_vertices_redundant.shape
+        # print(shape)
+        myset = set(tuple(i) for i in current_vertices_redundant.reshape(shape[0]*shape[1], shape[2]))
         return list(myset)
     
     #takes in a list of Mesh objects and combutes an axis aligned bounding box for each
@@ -72,7 +76,7 @@ class Mesh(Shape):
         x_lambda = lambda t: t[0]
         y_lambda = lambda t: t[1]
         z_lambda = lambda t: t[2]
-        0
+
         #only check against vertices referenced by triangles
         for i in range( len(meshes)):
             vertices = meshes[i].getUniqueVertices()
@@ -86,9 +90,9 @@ class Mesh(Shape):
         boxes = [Box(x1[i], y1[i], z1[i], x2[i], y2[i], z2[i]) for i in range (len(meshes))]
         return boxes
 
-test = Mesh("Meshes/knot.ply")
-print(test.vertices[test.triangles])
-test_box = Mesh.getBoundingBoxesCPU([test])[0]
+# test = Mesh("Meshes/knot.ply")
+# print(test.vertices[test.triangles])
+# test_box = Mesh.getBoundingBoxesCPU([test])[0]
 
-vertices = test.getUniqueVertices()[0]
-print(vertices[0])
+# vertices = test.getUniqueVertices()[0]
+# print(vertices[0])
