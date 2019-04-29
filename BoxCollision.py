@@ -99,4 +99,5 @@ def detectCollisionGPU(robot, obstacles):
     return collisions
 
 def detectCollisionCPU(robot, obstacles):
-    pass
+    collisions = [True]
+    return collisions
