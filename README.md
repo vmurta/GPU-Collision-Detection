@@ -13,10 +13,11 @@ Note: This can be incredibly difficult to install, it took the authors of this f
 
 ### Python Depenpencies
 You'll need Python-3.7 for any of these
-Additional dependencies are 
+The python dependencies are 
 - PyCUDA
 - NumPy
 - TkInter
+- Open3D
 
 ## Running 
 From the command line simply run 
