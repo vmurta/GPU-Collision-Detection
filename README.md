@@ -18,7 +18,7 @@ Additional dependencies are
 - NumPy
 - TkInter
 
-##Running 
+## Running 
 From the command line simply run 
 ```shell
 python uiGenerator.py
