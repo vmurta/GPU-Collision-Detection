@@ -1,5 +1,0 @@
-bool xrange = (x1_obs[obstacleId] <= x1_robot && x1_robot <= x2_obs[obstacleId])|| (x1_obs[obstacleId] <= x2_robot && x2_robot <= x2_obs[obstacleId]);
-        bool yrange = (y1_obs[obstacleId] <= y1_robot && y1_robot <= y2_obs[obstacleId]) || (y1_obs[obstacleId] <= y2_robot && y2_robot <= y2_obs[obstacleId]);
-        bool obsxrange = (x1_obs[obstacleId] >= x1_robot && x2_robot >= x1_obs[obstacleId])|| (x2_obs[obstacleId] <= x2_robot && x1_robot <= x2_obs[obstacleId]);
-        bool obsyrange = (y1_obs[obstacleId] >= y1_robot && y1_robot >= y1_obs[obstacleId]) || (y2_obs[obstacleId] <= y2_robot && y1_robot <= y2_obs[obstacleId]);
-        collisions[obstacleId] = (xrange && yrange) || (obsxrange && obsyrange);
