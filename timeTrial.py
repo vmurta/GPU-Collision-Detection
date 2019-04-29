@@ -6,16 +6,13 @@ Created on Tue Apr  9 20:10:11 2019
 """
 import numpy
 import os
-import pycuda.autoinit
-import pycuda.driver as drv
-import pycuda.gpuarray as gpuarray
 import time
 
-from pycuda.compiler import SourceModule
 import random
 import Shapes
 import CircleCollision
 import SphereCollision
+from SphereCollision import generateRandomSpheres
 import BoxCollision
 from CircleCollision import generateRandomCircles
 import RectangleCollision
@@ -25,7 +22,7 @@ class CollisionTest():
     def __init__(self):
         self.width = 400
         self.height = 400
-        self.numObstacles = 1000
+        self.numObstacles = 1024
         self.maxObstacleSize = 60#60 on rectangles, 40 on circles
         x_range = range(1, self.width)
         y_range = range(1, self.height)
@@ -34,8 +31,8 @@ class CollisionTest():
         #self.obstacles = generateRandomCircles(self.numObstacles,x_range, y_range, radius_range)
         #self.robot = generateRandomCircles(1, x_range, y_range, radius_range)[0]
         #rectangles
-        self.obstacles = generateRandomRectangles(self.numObstacles, x_range, y_range, radius_range)
-        self.robot = generateRandomRectangles(1, x_range, y_range, radius_range)[0]
+        self.obstacles = generateRandomSpheres(self.numObstacles)
+        self.robot = generateRandomSpheres(1) [0]
 
     def call_evaluation(self):
         return obstacleEval(self.obstacles, self.robot, self)
@@ -84,11 +81,21 @@ def obstacleEval(obstacles, robot, app):
         gpu_collisions_circles, gpu_time = CircleCollision.detectCollisionGPU(robot, obstacles)
         if((cpu_collisions_circles != gpu_collisions_circles).all()):
             print("difference of opinion, assume collision detection failed")
+
     if type(obstacles[0])==Shapes.Rectangle:
-        gpu_collisions_rectangles, cpu_time = RectangleCollision.detectCollisionGPU(robot, obstacles)
-        cpu_collisions_rectangles, gpu_time = RectangleCollision.detectCollisionCPU(robot, obstacles)
+        cpu_collisions_rectangles, cpu_time = RectangleCollision.detectCollisionCPU(robot, obstacles)
+        gpu_collisions_rectangles, gpu_time = RectangleCollision.detectCollisionGPU(robot, obstacles)
         if((cpu_collisions_rectangles != gpu_collisions_rectangles).all()):
             print("difference of opinion, assume collision detection failed")
+
+    if type(obstacles[0])==Shapes.Sphere:
+        cpu_collisions_sphere, cpu_time = SphereCollision.detectCollisionCPU(robot, obstacles)
+        gpu_collisions_sphere, gpu_time = SphereCollision.detectCollisionGPU(robot, obstacles)
+        if((cpu_collisions_sphere != gpu_collisions_sphere).all()):
+            print("difference of opinion, assume collision detection failed")
+
+    # print (cpu_time, gpu_time)
+
     return cpu_time, gpu_time
 def runTests(app):
     testCount = 100
@@ -99,8 +106,9 @@ def runTests(app):
         cpuTimes[i], gpuTimes[i] = app.call_evaluation()
         app.new_obstacles()
         i=i+1
-    #print(cpuTimes)
-    #print(gpuTimes)
+    print(cpuTimes)
+    print(gpuTimes)
+
     totalCpu = sum(cpuTimes)
     totalGpu = sum(gpuTimes)
     print("cpu time taken = "+str(totalCpu))
